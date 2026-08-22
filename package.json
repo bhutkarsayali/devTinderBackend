@@ -1,0 +1,33 @@
+{
+  "name": "devtinderbackend",
+  "version": "1.0.0",
+  "description": "Tinder for devs",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bhutkarsayali/devTinderBackend.git"
+  },
+  "keywords": [
+    "node",
+    "js",
+    "express",
+    "js",
+    "mongo",
+    "db",
+    "mongoose"
+  ],
+  "author": "Sayali B",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bhutkarsayali/devTinderBackend/issues"
+  },
+  "homepage": "https://github.com/bhutkarsayali/devTinderBackend#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
