@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema({
   lastName: {
     type: String,
   },
-  emalId: {
+  emailId: {
     type: String,
   },
   password: {
@@ -22,4 +22,4 @@ const userSchema = new mongoose.Schema({
 
 const userModel = mongoose.model("User", userSchema);
 
-module.exports = { userModel };
+module.exports = userModel;
