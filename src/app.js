@@ -3,6 +3,8 @@ const express = require("express");
 const { connectToDB } = require("./config/database");
 const app = express();
 const User = require("./model/user");
+const { validateSignUpData } = require("./utils/validations");
+const bcrypt = require("bcrypt");
 
 app.use(express.json());
 
@@ -16,20 +18,59 @@ app.post("/signup", async (req, res) => {
   // });
 
   /**adding data coming from postman or UI anyone outside the server, dynamically to db */
-  console.log(req.body);
-  const user1 = new User(req.body);
-  const skills = req.body.skills;
-  const MAX_ITEMS = 5;
-
+  // console.log(req.body);
   try {
-    // await user.save();
-    if (skills.length > MAX_ITEMS) {
+    //validation of data
+    validateSignUpData(req);
+    const { firstName, lastName, emailId, password, photoUrl, age, skills } =
+      req.body;
+
+    // Encrypt the password
+    const passwordHash = await bcrypt.hash(password, 10);
+    console.log(passwordHash);
+
+    // const user1 = new User(req.body);
+    const user1 = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+      photoUrl,
+      age,
+      skills,
+    });
+    const skillsArr = req.body.skills;
+    const MAX_ITEMS = 5;
+
+    if (skillsArr.length > MAX_ITEMS) {
       return res.status(400).send(`You can only add up to ${MAX_ITEMS} skills`);
     }
+
     await user1.save();
     res.send("Data added successfully");
   } catch (err) {
     res.status(400).send("Error sending the request:" + err.message);
+  }
+});
+
+//login API
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+    //check if email id is present in db
+    const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Email id is not present in DB");
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (isPasswordValid) {
+      res.send("Login Successful");
+    } else {
+      throw new Error("Password is not correct");
+    }
+  } catch (err) {
+    res.status(400).send("Something went wrong");
   }
 });
 
