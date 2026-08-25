@@ -18,9 +18,14 @@ app.post("/signup", async (req, res) => {
   /**adding data coming from postman or UI anyone outside the server, dynamically to db */
   console.log(req.body);
   const user1 = new User(req.body);
+  const skills = req.body.skills;
+  const MAX_ITEMS = 5;
 
   try {
     // await user.save();
+    if (skills.length > MAX_ITEMS) {
+      return res.status(400).send(`You can only add up to ${MAX_ITEMS} skills`);
+    }
     await user1.save();
     res.send("Data added successfully");
   } catch (err) {
@@ -54,10 +59,27 @@ app.get("/feed", async (req, res) => {
 });
 
 /** Update user by userId from database */
-app.patch("/user", async (req, res) => {
-  const userId = req.body.userId;
+app.patch("/user/:userId", async (req, res) => {
+  // const userId = req.body.userId;
+  const userId = req.params?.userId;
   const data = req.body;
   try {
+    //API level data sanitization, updates are allowed for mentioned data only
+    const ALLOWED_UPDATES = ["photoURL", "about", "gender", "age", "skills"];
+
+    /**data= req.body: {
+        firstName: "Sayali",
+        lastName: "Bhtkar",
+        emailId: "Bhtkar@gmail.com",
+        password: "Bhtkarsayali",
+      } */
+    const isUpdateAllowed = Object.keys(data).every((k) =>
+      ALLOWED_UPDATES.includes(k),
+    );
+    if (!isUpdateAllowed) {
+      throw new Error("Update not allowed");
+    }
+
     // const users = await User.findByIdAndDelete({userId:userId}); both can work
     await User.findByIdAndUpdate({ _id: userId }, data, {
       returnDocument: "after",
@@ -76,7 +98,7 @@ app.patch("/user", async (req, res) => {
   try {
     // const users = await User.findByIdAndDelete({userId:userId}); both can work
     await User.findOneAndUpdate({ emailId: userEmailId }, data, {
-      new: true, // 3. Return the updated doc, not the old one
+      returnDocument: "after", // 3. Return the updated doc, not the old one
       runValidators: false, // 4. Force Mongoose schema validation
     });
     res.send("User updated successfully");
