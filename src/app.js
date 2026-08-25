@@ -59,7 +59,10 @@ app.patch("/user", async (req, res) => {
   const data = req.body;
   try {
     // const users = await User.findByIdAndDelete({userId:userId}); both can work
-    await User.findByIdAndUpdate({ _id: userId }, data);
+    await User.findByIdAndUpdate({ _id: userId }, data, {
+      returnDocument: "after",
+      runValidators: true,
+    });
     res.send("User updated successfully");
   } catch (err) {
     res.status(400).send("Something went wrong");
@@ -78,7 +81,7 @@ app.patch("/user", async (req, res) => {
     });
     res.send("User updated successfully");
   } catch (err) {
-    res.status(400).send("Something went wrong");
+    res.status(400).send("Update Failed" + err.message);
   }
 });
 
