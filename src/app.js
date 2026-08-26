@@ -5,8 +5,11 @@ const app = express();
 const User = require("./model/user");
 const { validateSignUpData } = require("./utils/validations");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 
 app.use(express.json());
+app.use(cookieParser);
 
 app.post("/signup", async (req, res) => {
   /** creating a new instance of a user model and adding data to db */
@@ -65,10 +68,44 @@ app.post("/login", async (req, res) => {
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (isPasswordValid) {
+      //Create JWT Token
+      const token = await jwt.sign({ _id: user._id }, "Dev@Tinder$790");
+
+      //Add the token to cookie and send it back to the user
+      // res.cookie("token", "randomtokenabczyz");
+      res.cookie("token", token);
       res.send("Login Successful");
     } else {
       throw new Error("Password is not correct");
     }
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+
+//get profile API
+app.get("/profile", async (req, res) => {
+  try {
+    //validate the cookie
+    const cookies = req.cookies;
+    console.log(cookies);
+
+    const { token } = cookies;
+    //validate the token and handle error cases
+    if(!token){
+      throw new Error("Token is not valid")
+    }
+    const decodedMessage = await jwt.verify(token, "Dev@Tinder$790");
+    console.log(decodedMessage);
+    const { _id } = decodedMessage;
+    console.log("LoggedIn User is: " + _id);
+
+    const user = await User.findById(_id)
+    if(!user){
+      throw new Error("User does not exists")
+    }
+    // res.send("Reading Cookies");
+    res.send(user);
   } catch (err) {
     res.status(400).send("Something went wrong");
   }
@@ -153,14 +190,14 @@ app.patch("/user", async (req, res) => {
 connectToDB()
   .then(() => {
     console.log("DB connection established successfully");
-    app.listen(3000, () => {
-      console.log("Server is successfully listening to port 3000");
+    app.listen(7777, () => {
+      console.log("Server is successfully listening to port 7777");
     });
   })
   .catch((err) => {
     console.error("Not connected to DB");
   });
 
-// app.listen(3000, () => {
-//   console.log("Server is successfully listening to port 3000");
+// app.listen(7777, () => {
+//   console.log("Server is successfully listening to port 7777");
 // });
