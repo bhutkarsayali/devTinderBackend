@@ -1,4 +1,38 @@
-const adminAuth = (req, res, next) => {
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const User = require("./../model/user");
+
+const userAuth = async (req, res, next) => {
+  try {
+    // read the token from request cookies
+    const cookies = req.cookies;
+    const { token } = cookies;
+    if (!token) {
+      throw new Error("Token is not valid");
+    }
+
+    // validate the token
+    const decodedObj = await jwt.verify(token, "Dev@Tinder$790");
+    const { _id } = decodedObj;
+
+    // find the user
+    const user = await User.findById(_id);
+    if (!user) {
+      throw new Error("User does not exists");
+    }
+    //attaching the user in the request
+    req.user = user;
+    next();
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+};
+
+module.exports = {
+  userAuth,
+};
+
+/**const adminAuth = (req, res, next) => {
   const token = "xyz";
   const isAdminAutherized = token === "xyz";
 
@@ -23,4 +57,6 @@ const userAuth = (req, res, next) => {
 module.exports={
     adminAuth,
     userAuth
-}
+} 
+
+*/

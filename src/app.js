@@ -7,6 +7,7 @@ const { validateSignUpData } = require("./utils/validations");
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
+const userAuth = require("./middlewares/auth");
 
 app.use(express.json());
 app.use(cookieParser);
@@ -83,7 +84,7 @@ app.post("/login", async (req, res) => {
   }
 });
 
-//get profile API
+/** get profile API = using validations here **
 app.get("/profile", async (req, res) => {
   try {
     //validate the cookie
@@ -105,6 +106,17 @@ app.get("/profile", async (req, res) => {
       throw new Error("User does not exists")
     }
     // res.send("Reading Cookies");
+    res.send(user);
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+*/
+
+// get profile API = using validations from middleware
+app.get("/profile", userAuth, async (req, res) => {
+  try {
+    const user = req.user;
     res.send(user);
   } catch (err) {
     res.status(400).send("Something went wrong");
