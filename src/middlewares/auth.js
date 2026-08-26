@@ -1,4 +1,3 @@
-const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const User = require("./../model/user");
 
@@ -24,7 +23,7 @@ const userAuth = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
-    res.status(400).send("Something went wrong");
+    res.status(400).send("Error sending the request:" + err.message);
   }
 };
 
