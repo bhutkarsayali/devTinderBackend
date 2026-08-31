@@ -37,11 +37,15 @@ const userSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      validate(value) {
-        if (!["male", "female", "other"].includes(value)) {
-          throw new Error("Gender data is not valid");
-        }
+      enum: {
+        values: ["male", "female", "other"],
+        message: "{VALUE} is not a valid gender type",
       },
+      // validate(value) {
+      //   if (!["male", "female", "other"].includes(value)) {
+      //     throw new Error("Gender data is not valid");
+      //   }
+      // },
     },
     age: {
       type: String,
@@ -69,6 +73,9 @@ const userSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+userSchema.index({ firstName: 1 });
+userSchema.index({ gender: 1 });
+
 userSchema.methods.getJWT = async function () {
   const user = this;
   const token = await jwt.sign({ _id: user._id }, "Dev@Tinder$790", {
@@ -80,7 +87,10 @@ userSchema.methods.getJWT = async function () {
 userSchema.methods.validatePassword = async function (passwordInputByUser) {
   const user = this;
   const passwordHash = user.password;
-  const isPasswordValid = await bcrypt.compare(passwordInputByUser, passwordHash);
+  const isPasswordValid = await bcrypt.compare(
+    passwordInputByUser,
+    passwordHash,
+  );
   return isPasswordValid;
 };
 
