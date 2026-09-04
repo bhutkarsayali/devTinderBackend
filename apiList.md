@@ -26,3 +26,9 @@
 
 
 Status: ignore, interested, accepted, rejected
+
+// Pagination
+// /user/feed?page=1&limit=10  => gives first 10 users 1 to 10 => .skip(0) & .limit(10)
+// /user/feed?page=2&limit=10  => gives 10 users from 11 to 20
+
+skip formula = (page - 1) * limit
