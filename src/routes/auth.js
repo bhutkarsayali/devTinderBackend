@@ -9,7 +9,7 @@ authRouter.post("/signup", async (req, res) => {
   try {
     //validation of data
     validateSignUpData(req);
-    const { firstName, lastName, emailId, password, photoUrl, age, skills } =
+    const { firstName, lastName, emailId, password, photoURL, age, skills } =
       req.body;
 
     // Encrypt the password
@@ -22,19 +22,31 @@ authRouter.post("/signup", async (req, res) => {
       lastName,
       emailId,
       password: passwordHash,
-      photoUrl,
+      photoURL,
       age,
       skills,
     });
-    const skillsArr = req.body.skills;
+    const skillsArr = req.body.skills || [];
     const MAX_ITEMS = 5;
 
     if (skillsArr.length > MAX_ITEMS) {
       return res.status(400).send(`You can only add up to ${MAX_ITEMS} skills`);
     }
 
-    await user1.save();
-    res.send("Data added successfully");
+    const savedUser = await user1.save();
+
+    const token = await savedUser.getJWT();
+
+    //Add the token to cookie and send it back to the user
+
+    //cookie expires in 8 hours
+    res.cookie("token", token, {
+      expires: new Date(Date.now() + 8 * 3600000),
+      httpOnly: true,
+      secure: false, // allow cookies over http://localhost
+      sameSite: "lax", // works for same-site requests
+    });
+    res.json({ message: "Data added successfully", data: savedUser });
   } catch (err) {
     res.status(400).send("Error sending the request:" + err.message);
   }
@@ -60,6 +72,8 @@ authRouter.post("/login", async (req, res) => {
       res.cookie("token", token, {
         expires: new Date(Date.now() + 8 * 3600000),
         httpOnly: true,
+        secure: false, // allow cookies over http://localhost
+        sameSite: "lax", // works for same-site requests
       });
       // res.send("Login Successful!" + user);
       res.send(user);

@@ -4,10 +4,18 @@ const app = express();
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
-app.use(cors({
-  origin: "http://localhost:5173/login",
-  credentials: true
-}));
+
+app.use(
+  cors({
+    origin: ["http://localhost:5173", "http://127.0.0.1:5173"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    credentials: true,
+  }),
+);
+
+// Add this line to automatically handle preflight OPTIONS requests across all routes
+app.options(/.*/, cors());
+
 app.use(express.json());
 app.use(cookieParser());
 
