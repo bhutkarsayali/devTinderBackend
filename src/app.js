@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 require("dotenv").config();
 
+const http = require("http");
 
 app.use(
   cors({
@@ -24,6 +25,7 @@ const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/requests");
 const userRouter = require("./routes/user");
+const initializeSocket = require("./utils/socket");
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
@@ -36,10 +38,14 @@ app.use((err, req, res, next) => {
   res.status(400).json({ error: err.message });
 });
 
+const server = http.createServer(app);
+initializeSocket(server);
+
 connectToDB()
   .then(() => {
     console.log("DB connection established successfully");
-    app.listen(3000, () => {
+    // app.listen(3000, () => {
+    server.listen(3000, () => {
       console.log("Server is successfully listening to port 3000");
     });
   })
